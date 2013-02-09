@@ -1,6 +1,6 @@
-# Paperclip::Webdav
+# Webdav storage for paperclip
 
-TODO: Write a gem description
+Upload [Paperclip](https://github.com/thoughtbot/paperclip) attachments to a remote server via webdav.
 
 ## Installation
 
@@ -18,7 +18,76 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+#### In your rails model:
+
+```ruby
+class User < ActiveRecord::Base
+  has_attached_file :avatar,
+
+    # Choose the Webdav storage backend
+    :storage => :webdav,
+
+    # Set where to store the file on the Webdav server(s).
+    # This supports Paperclip::Interpolations.
+    :path => "/images/:attachment/:id/:style/:filename",
+    
+    # Hostname for generating links.
+    :public_url => "http://cdn.example.com", # optional
+
+    # The list of Webdav servers to use
+    :webdav_servers => [
+      {
+        :url      => "http://webdav1.example.com",
+        :username => "foo", # optional
+        :password => "bar", # optional
+      },
+      # Add more servers if needed
+      {
+        :url      => "http://webdav1.example.com",
+        :username => "foo", # optional
+        :password => "bar"  # optional
+      }
+    ]
+end
+```
+
+#### Or your config/application.rb (config/environments/*.rb):
+
+```ruby
+module YourApp
+  class Application < Rails::Application
+    # Other code...
+
+    config.paperclip_defaults = {
+      # Choose the Webdav storage backend
+      :storage => :webdav,
+      
+      # Set where to store the file on the Webdav server(s).
+      # This supports Paperclip::Interpolations.
+      :path => "/images/:attachment/:id/:style/:filename",
+      
+      # Hostname for generating links.
+      :public_url => "http://cdn.example.com", # optional
+      
+      # The list of Webdav servers to use
+      :webdav_servers => [
+        {
+          :url      => "http://webdav1.example.com",
+          :username => "foo", # optional
+          :password => "bar", # optional
+        },
+        # Add more servers if needed
+        {
+          :url      => "http://webdav1.example.com",
+          :username => "foo", # optional
+          :password => "bar"  # optional
+        }
+      ]
+    }
+  end
+end
+
+```
 
 ## Contributing
 
