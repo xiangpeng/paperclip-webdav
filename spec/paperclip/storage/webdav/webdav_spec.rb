@@ -1,6 +1,8 @@
 require "spec_helper"
 
 describe Paperclip::Storage::Webdav do
+  let(:original_path) { "/files/original/image.png" }
+  let(:thumb_path) { "/files/thumb/image.png" }
   [:attachment, :attachment_with_public_url].each do |attachment|
     let(attachment) do
       model = double()
@@ -17,6 +19,9 @@ describe Paperclip::Storage::Webdav do
       options[:public_url] = "http://public.example.com" if attachment == :attachment_with_public_url
       
       attachment = Paperclip::Attachment.new(:image, model, options)
+      attachment.instance_variable_set(:@original_path, original_path)
+      attachment.instance_variable_set(:@thumb_path, thumb_path)
+      attachment
     end
   end
   
@@ -49,14 +54,14 @@ describe Paperclip::Storage::Webdav do
     
     it "should returns true if file exists on the primary server" do
       attachment.instance_eval do
-        primary_server.should_receive(:file_exists?).with("/files/original/image.png").and_return(true)
+        primary_server.should_receive(:file_exists?).with(@original_path).and_return(true)
       end
       attachment.exists?.should be_true
     end
     
     it "accepts an optional style_name parameter to build the correct file pat" do
       attachment.instance_eval do
-        primary_server.should_receive(:file_exists?).with("/files/thumb/image.png").and_return(true)
+        primary_server.should_receive(:file_exists?).with(@thumb_path).and_return(true)
       end
       attachment.exists?(:thumb).should be_true
     end
@@ -77,8 +82,8 @@ describe Paperclip::Storage::Webdav do
         end
         
         servers.each do |server|
-          server.should_receive(:put_file).with("/files/original/image.png", @queued_for_write[:original])
-          server.should_receive(:put_file).with("/files/thumb/image.png", @queued_for_write[:thumb])
+          server.should_receive(:put_file).with(@original_path, @queued_for_write[:original])
+          server.should_receive(:put_file).with(@thumb_path, @queued_for_write[:thumb])
         end
       end
       attachment.should_receive(:after_flush_writes).with(no_args)
@@ -89,14 +94,12 @@ describe Paperclip::Storage::Webdav do
   
   describe "flush_deletes" do
     it "deletes files on each servers" do
-      attachment.instance_variable_set(:@queued_for_delete, [
-        "/files/original/image.png",
-        "/files/thumb/image.png"
-      ])
+      attachment.instance_variable_set(:@queued_for_delete, [original_path, thumb_path])
       attachment.instance_eval do
         servers.each do |server|
-          server.should_receive(:delete_file).with(@queued_for_delete.first)
-          server.should_receive(:delete_file).with(@queued_for_delete.last)
+          @queued_for_delete.each do |path|
+            server.should_receive(:delete_file).with(path)
+          end
         end
       end
       attachment.flush_deletes
@@ -107,14 +110,14 @@ describe Paperclip::Storage::Webdav do
   describe "copy_to_local_file" do
     it "save file" do
       attachment.instance_eval do
-        primary_server.should_receive(:get_file).with("/files/original/image.png", "/local").and_return(nil)
+        primary_server.should_receive(:get_file).with(@original_path, "/local").and_return(nil)
       end
       attachment.copy_to_local_file(:original, "/local")
     end
     
     it "save file with custom style" do
       attachment.instance_eval do
-        primary_server.should_receive(:get_file).with("/files/thumb/image.png", "/local").and_return(nil)
+        primary_server.should_receive(:get_file).with(@thumb_path, "/local").and_return(nil)
       end
       attachment.copy_to_local_file(:thumb, "/local")
     end

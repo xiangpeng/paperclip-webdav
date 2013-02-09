@@ -2,10 +2,12 @@ require "spec_helper"
 
 describe Paperclip::Storage::Webdav::Server do
   let(:response) { double() }
-  let(:server) { Paperclip::Storage::Webdav::Server.new :url => "http://example.com" }
+  let(:image_path) { "/files/image.png" }
+  let(:host) { "http://example.com" }
+  let(:server) { Paperclip::Storage::Webdav::Server.new :url => host }
   let(:server_with_auth) do
     credentials = {}
-    credentials[:url] = "http://example.com"
+    credentials[:url] = host
     credentials[:username] = "username"
     credentials[:password] = "password"
     Paperclip::Storage::Webdav::Server.new credentials    
@@ -15,13 +17,13 @@ describe Paperclip::Storage::Webdav::Server do
     it "should returns true if (200 <= status_code < 210)" do
       response.stub(:response_code).and_return(200)
       Curl::Easy.should_receive(:http_head).and_return(response)
-      server.file_exists?("/files/image.png").should be_true
+      server.file_exists?(image_path).should be_true
     end
     
-    it "should returns false if status_code != 200..210" do
+    it "should returns false if status_code != 200..209" do
       response.stub(:response_code).and_return(404)
       Curl::Easy.should_receive(:http_head).and_return(response)
-      server.file_exists?("/files/image.png").should be_false
+      server.file_exists?(image_path).should be_false
     end
   end
   
@@ -46,9 +48,11 @@ describe Paperclip::Storage::Webdav::Server do
   
   describe "full_url" do
     it "full_url should returns correct url" do
+      server.instance_variable_set(:@image_path, image_path)
+      server.instance_variable_set(:@host, host)
       server.instance_eval do
-        should_receive(:full_url).with("/files/image.png").and_return("http://example.com/files/image.png")
-        full_url "/files/image.png"
+        should_receive(:full_url).with(@image_path).and_return("#{@host}#{@image_path}")
+        full_url @image_path
       end
     end
   end

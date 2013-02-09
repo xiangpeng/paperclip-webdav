@@ -34,9 +34,7 @@ module Paperclip
           end
           file.rewind
         end
-
         after_flush_writes
-
         @queued_for_write = {}
       end
 
@@ -49,12 +47,12 @@ module Paperclip
         @queued_for_delete = []
       end
 
-      def copy_to_local_file(style, local_dest_path)
+      def copy_to_local_file style, local_dest_path
         primary_server.get_file path(style), local_dest_path
       end
       
       private
-      def public_url(style = default_style)
+      def public_url style = default_style
         @options[:public_host] ||= URI.parse(@options[:webdav_servers].first)
         URI.join(@options[:public_host], path(style)).to_s
       end
