@@ -4,8 +4,10 @@ module Paperclip
   module Storage
     module Webdav
       class Server
-        def initialize url
-          @url = url
+        def initialize credentials
+          @url = credentials[:url]
+          @username = credentials[:username]
+          @password = credentials[:password]
         end
         
         def file_exists? path
@@ -18,14 +20,19 @@ module Paperclip
         end
         
         def put_file path, file
-          Curl::Easy.http_put full_url(path), file
+          Curl::Easy.http_put full_url(path), file, &method(:auth)
         end
         
         def delete_file path
-          Curl::Easy.http_delete full_url(path)
+          Curl::Easy.http_delete full_url(path), &method(:auth)
         end
         
         private
+        def auth curl
+          curl.username = @username unless @username.nil?
+          curl.password = @password unless @password.nil?
+        end
+        
         def full_url path
           URI.join(@url, path).to_s
         end

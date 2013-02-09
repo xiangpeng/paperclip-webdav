@@ -19,7 +19,7 @@ module Paperclip
         end
       end
       
-      def exists?(style_name = default_style)
+      def exists? style_name = default_style
         if original_filename
           primary_server.file_exists? path(style_name)
         else
@@ -62,8 +62,8 @@ module Paperclip
       def servers
         @webdav_servers ||= begin
           servers = []
-          @options[:webdav_servers].each do |url|
-            servers << Server.new(url)
+          @options[:webdav_servers].each do |credentials|
+            servers << Server.new(credentials)
           end
           servers
         end

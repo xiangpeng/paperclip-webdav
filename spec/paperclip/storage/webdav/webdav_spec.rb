@@ -10,7 +10,10 @@ describe Paperclip::Storage::Webdav do
       options = {}
       options[:storage] = :webdav
       options[:path] = "/files/:style/:filename"
-      options[:webdav_servers] = ["http://webdav1.example.com", "http://webdav2.example.com"]
+      options[:webdav_servers] = [
+        {:url => "http://webdav1.example.com"},
+        {:url => "http://webdav2.example.com"}
+      ]        
       options[:public_url] = "http://public.example.com" if attachment == :attachment_with_public_url
       
       attachment = Paperclip::Attachment.new(:image, model, options)
