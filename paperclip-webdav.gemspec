@@ -1,11 +1,11 @@
 # -*- encoding: utf-8 -*-
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'paperclip-webdav/version'
+require 'paperclip/storage/version'
 
 Gem::Specification.new do |gem|
   gem.name          = "paperclip-webdav"
-  gem.version       = Paperclip::Webdav::VERSION
+  gem.version       = Paperclip::Storage::Webdav::VERSION
   gem.authors       = ["Nikita Vorobej"]
   gem.email         = ["mail@gamersroom.ru"]
   gem.description   = %q{Webdav storage for paperclip}
